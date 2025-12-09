@@ -108,7 +108,11 @@
   <rect x="190" y="60" width="130" height="60" rx="10" fill="url(#cardGrad)" stroke="#334155"/>
   <text x="245" y="78" fill="#64748b" font-family="system-ui" font-size="9" text-anchor="middle">HEART RATE</text>
   <text x="205" y="87" font-size="20">❤️</text>
-  <text x="205" y="108" fill="#f43f5e" font-family="monospace" font-size="24" font-weight="bold">72</text>
+  <!-- Animated heart rate value -->
+  <text x="205" y="108" fill="#f43f5e" font-family="monospace" font-size="24" font-weight="bold">
+    <animate attributeName="opacity" values="1;1;1;1;1;0;1" dur="0.8s" repeatCount="indefinite"/>
+    72
+  </text>
   <text x="240" y="108" fill="#64748b" font-family="system-ui" font-size="11">BPM</text>
   <text x="285" y="100" fill="#64748b" font-family="system-ui" font-size="14">→</text>
   
@@ -209,44 +213,96 @@
   <text x="833" y="72" fill="#f8fafc" font-family="system-ui" font-size="10" font-weight="600">🤖 AI Agent</text>
   <rect x="810" y="83" width="90" height="2" fill="#3b82f6"/>
   
-  <!-- Chat messages -->
-  <rect x="730" y="95" width="160" height="50" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)"/>
-  <text x="740" y="110" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">👤 You</text>
-  <text x="740" y="125" fill="#f8fafc" font-family="system-ui" font-size="10">What's my current</text>
-  <text x="740" y="138" fill="#f8fafc" font-family="system-ui" font-size="10">heart rate?</text>
+  <!-- ============================================ -->
+  <!-- ANIMATED CHAT CONVERSATION -->
+  <!-- ============================================ -->
   
-  <rect x="730" y="155" width="160" height="95" rx="8" fill="#0f172a" stroke="#334155"/>
-  <text x="740" y="170" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">🤖 Agent</text>
-  <text x="740" y="188" fill="#f8fafc" font-family="system-ui" font-size="10">Your current heart rate</text>
-  <text x="740" y="203" fill="#f8fafc" font-family="system-ui" font-size="10">is </text>
-  <text x="752" y="203" fill="#f43f5e" font-family="monospace" font-size="10" font-weight="bold">72 BPM</text>
-  <text x="795" y="203" fill="#f8fafc" font-family="system-ui" font-size="10">, which is</text>
-  <text x="740" y="218" fill="#22c55e" font-family="system-ui" font-size="10" font-weight="bold">normal</text>
-  <text x="775" y="218" fill="#f8fafc" font-family="system-ui" font-size="10">. This is within</text>
-  <text x="740" y="233" fill="#f8fafc" font-family="system-ui" font-size="10">the healthy range of</text>
-  <text x="740" y="248" fill="#f8fafc" font-family="system-ui" font-size="10">60-100 BPM.</text>
+  <!-- Message 1: User question (appears first) -->
+  <g>
+    <animate attributeName="opacity" values="0;0;1;1;1;1;1;1;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="95" width="160" height="45" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)"/>
+    <text x="740" y="110" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">👤 You</text>
+    <text x="740" y="128" fill="#f8fafc" font-family="system-ui" font-size="10">What's my heart rate?</text>
+  </g>
   
-  <rect x="730" y="260" width="160" height="40" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)"/>
-  <text x="740" y="275" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">👤 You</text>
-  <text x="740" y="292" fill="#f8fafc" font-family="system-ui" font-size="10">Summarize my vitals</text>
+  <!-- Typing indicator (appears after question) -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;1;1;0;0;0;0;0" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="150" width="70" height="30" rx="8" fill="#0f172a" stroke="#334155"/>
+    <circle cx="748" cy="165" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="762" cy="165" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.15s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="776" cy="165" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
   
-  <rect x="730" y="310" width="160" height="120" rx="8" fill="#0f172a" stroke="#334155"/>
-  <text x="740" y="325" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">🤖 Agent</text>
-  <text x="740" y="343" fill="#f8fafc" font-family="system-ui" font-size="10" font-weight="bold">📊 Vitals Summary</text>
-  <text x="740" y="362" fill="#f8fafc" font-family="system-ui" font-size="10">❤️ HR: </text>
-  <text x="775" y="362" fill="#f43f5e" font-family="monospace" font-size="10">72 BPM</text>
-  <text x="740" y="378" fill="#f8fafc" font-family="system-ui" font-size="10">💧 SpO2: </text>
-  <text x="790" y="378" fill="#06b6d4" font-family="monospace" font-size="10">98.5%</text>
-  <text x="740" y="394" fill="#f8fafc" font-family="system-ui" font-size="10">🌡️ Temp: </text>
-  <text x="793" y="394" fill="#fbbf24" font-family="monospace" font-size="10">36.6°C</text>
-  <text x="740" y="410" fill="#f8fafc" font-family="system-ui" font-size="10">📈 HRV: </text>
-  <text x="785" y="410" fill="#8b5cf6" font-family="monospace" font-size="10">42 ms</text>
-  <text x="740" y="426" fill="#22c55e" font-family="system-ui" font-size="9">✅ All vitals normal</text>
+  <!-- Message 2: AI Response (appears after typing) -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;1;1;1;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="150" width="160" height="75" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="740" y="165" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">🤖 Agent</text>
+    <text x="740" y="183" fill="#f8fafc" font-family="system-ui" font-size="10">Your heart rate is</text>
+    <text x="740" y="198" fill="#f43f5e" font-family="monospace" font-size="12" font-weight="bold">72 BPM</text>
+    <text x="787" y="198" fill="#f8fafc" font-family="system-ui" font-size="10">which is</text>
+    <text x="740" y="218" fill="#22c55e" font-family="system-ui" font-size="10" font-weight="bold">✓ Normal</text>
+    <text x="792" y="218" fill="#64748b" font-family="system-ui" font-size="9">(60-100)</text>
+  </g>
   
-  <!-- Input area -->
+  <!-- Message 3: Second user question -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;1;1;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="235" width="160" height="45" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)"/>
+    <text x="740" y="250" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">👤 You</text>
+    <text x="740" y="268" fill="#f8fafc" font-family="system-ui" font-size="10">How's my SpO2?</text>
+  </g>
+  
+  <!-- Typing indicator 2 -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0;0" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="290" width="70" height="30" rx="8" fill="#0f172a" stroke="#334155"/>
+    <circle cx="748" cy="305" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="762" cy="305" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.15s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="776" cy="305" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Message 4: AI Response about SpO2 -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="290" width="160" height="75" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="740" y="305" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">🤖 Agent</text>
+    <text x="740" y="323" fill="#f8fafc" font-family="system-ui" font-size="10">Your SpO2 is</text>
+    <text x="740" y="338" fill="#06b6d4" font-family="monospace" font-size="12" font-weight="bold">98.5%</text>
+    <text x="787" y="338" fill="#f8fafc" font-family="system-ui" font-size="10">which is</text>
+    <text x="740" y="358" fill="#22c55e" font-family="system-ui" font-size="10" font-weight="bold">✓ Excellent</text>
+    <text x="803" y="358" fill="#64748b" font-family="system-ui" font-size="9">(>95%)</text>
+  </g>
+  
+  <!-- Scroll indicator dots -->
+  <g>
+    <circle cx="810" y="420" r="3" fill="#64748b"/>
+    <circle cx="810" y="428" r="3" fill="#3b82f6">
+      <animate attributeName="cy" values="428;420;428" dur="4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Input area with blinking cursor -->
   <rect x="720" y="440" width="180" height="40" fill="#334155"/>
   <rect x="730" y="450" width="115" height="28" rx="6" fill="#0f172a" stroke="#334155"/>
   <text x="740" y="468" fill="#64748b" font-family="system-ui" font-size="10">Ask about health...</text>
+  <!-- Blinking cursor -->
+  <rect x="835" y="456" width="2" height="16" fill="#3b82f6">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
   <rect x="850" y="450" width="40" height="28" rx="6" fill="#3b82f6"/>
   <text x="858" y="468" fill="white" font-family="system-ui" font-size="10" font-weight="bold">Send</text>
   
