@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/biosense-preview.svg" alt="BioSense Prism Preview" width="100%" />
+  <img src="assets/biosense-screenshot.png" alt="BioSense Prism Preview" width="100%" />
 </p>
 
 <h1 align="center">🫀 BioSense Prism</h1>
