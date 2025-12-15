@@ -552,19 +552,31 @@
         if (data.length < 2) return;
         
         const values = data.map(d => d.value);
-        const min = Math.min(...values), max = Math.max(...values), range = max - min || 1, padding = range * 0.15;
-        
+        // const min = Math.min(...values), max = Math.max(...values), range = max - min || 1, padding = range * 0.15;
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+
+        // hard pixel padding instead of value padding
+        const topPad = height * 0.12;
+        const bottomPad = height * 0.12;
+                
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
+       // ctx.shadowBlur = 8;
+        ctx.shadowBlur = color === '#f43f5e' ? 3 : 8;
         
         ctx.beginPath();
         for (let i = 0; i < data.length; i++) {
           const x = (i / (data.length - 1)) * width;
-          const y = height - ((data[i].value - min + padding) / (range + 2 * padding)) * height;
+          //const y = height - ((data[i].value - min + padding) / (range + 2 * padding)) * height;
+
+          const y = height - bottomPad - ((data[i].value - min) / range) * (height - topPad - bottomPad);
+
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.stroke();
