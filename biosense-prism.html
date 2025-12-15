@@ -400,6 +400,7 @@
 
     // Signal Processing
     const Signal = {
+      /* ---------------- BASIC OPS ---------------- */
       map: (signal, f) => signal.map(s => ({ ...s, value: f(s.value) })),
       scale: (signal, k) => Signal.map(signal, v => v * k),
       offset: (signal, d) => Signal.map(signal, v => v + d),
@@ -411,6 +412,8 @@
         const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
         return Signal.map(signal, v => (v - min) / range);
       },
+
+      /* ---------------- FILTERING ---------------- */
       sma: (signal, window = 5) => {
         if (signal.length < window) return signal;
         const result = []; let sum = 0;
@@ -436,6 +439,52 @@
         return signal.map((s, i) => ({ ...s, value: s.value - (low[i]?.value || 0) }));
       },
       bandpass: (signal, low = 0.05, high = 0.2) => Signal.highpass(Signal.lowpass(signal, high), low),
+
+      /* ---------------- ARTIFACT REMOVAL ---------------- */
+      artifactReject: (signal, maxSlope = 0.5) => {
+        if (signal.length < 2) return signal;
+        const clean = [signal[0]];
+        for (let i = 1; i < signal.length; i++) {
+          if (Math.abs(signal[i].value - signal[i - 1].value) < maxSlope) {
+            clean.push(signal[i]);
+          }
+        }
+        return clean;
+      },
+
+      /* ---------------- PAN-TOMPKINS ---------------- */
+      diff: (signal) =>
+        signal.length < 2 ? [] :
+        signal.slice(1).map((s, i) => ({
+          ...s,
+          value: s.value - signal[i].value
+        })),
+
+      mwi: (signal, window = 30) => {
+        const out = [];
+        for (let i = 0; i < signal.length; i++) {
+          const slice = signal.slice(Math.max(0, i - window), i + 1);
+          const avg = slice.reduce((a, b) => a + b.value, 0) / slice.length;
+          out.push({ ...signal[i], value: avg });
+        }
+        return out;
+      },
+
+      detectRPeaks: (signal) => {
+        if (signal.length < 3) return [];
+        const mean =
+          signal.reduce((a, s) => a + s.value, 0) / signal.length;
+        const threshold = mean * 1.2;
+
+        return signal.filter((s, i) =>
+          i > 1 &&
+          i < signal.length - 1 &&
+          s.value > threshold &&
+          s.value > signal[i - 1].value &&
+          s.value > signal[i + 1].value
+        );
+      },
+
       threshold: (signal, min = -Infinity, max = Infinity) => signal.filter(s => s.value >= min && s.value <= max),
       removeOutliers: (signal, k = 1.5) => {
         const values = signal.map(s => s.value).sort((a, b) => a - b);
@@ -444,6 +493,7 @@
       },
       downsample: (signal, factor = 2) => signal.filter((_, i) => i % factor === 0),
       diff: (signal) => signal.length < 2 ? [] : signal.slice(1).map((s, i) => ({ ...s, value: s.value - signal[i].value })),
+      square: (signal) => Signal.map(signal, v => v * v),
       stats: (signal) => {
         if (signal.length === 0) return { min: 0, max: 0, mean: 0, std: 0 };
         const values = signal.map(s => s.value);
@@ -452,21 +502,55 @@
         const std = Math.sqrt(values.reduce((a, v) => a + Math.pow(v - mean, 2), 0) / values.length);
         return { min, max, mean, std };
       },
-      detectPeaks: (signal, threshold = 0.5) => {
-        const peaks = [];
-        for (let i = 2; i < signal.length - 2; i++) {
-          const v = signal[i].value;
-          if (v > signal[i-1].value && v > signal[i-2].value && v > signal[i+1].value && v > signal[i+2].value && v > threshold) peaks.push(signal[i]);
-        }
-        return peaks;
-      },
+      detectPeaks: (signal, threshold = 0.5) => Signal.detectRPeaks(signal),
+
+      /* ---------------- HR & HRV ---------------- */
       calculateHR: (peaks) => {
         if (peaks.length < 2) return 0;
-        const intervals = [];
-        for (let i = 1; i < peaks.length; i++) intervals.push(peaks[i].time - peaks[i-1].time);
-        const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-        return avgInterval > 0 ? 60000 / avgInterval : 0;
+        const rr = peaks.slice(1).map((p, i) => p.time - peaks[i].time);
+        const avg = rr.reduce((a, b) => a + b, 0) / rr.length;
+        return avg ? 60000 / avg : 0;
       },
+
+      calculateHRVTime: (peaks) => {
+        if (peaks.length < 3) return { sdnn: 0, rmssd: 0, pnn50: 0 };
+        const rr = peaks.slice(1).map((p, i) => p.time - peaks[i].time);
+        const mean = rr.reduce((a, b) => a + b, 0) / rr.length;
+        const sdnn = Math.sqrt(rr.reduce((a, v) => a + (v - mean) ** 2, 0) / rr.length);
+
+        const diffs = rr.slice(1).map((v, i) => Math.abs(v - rr[i]));
+        const rmssd = Math.sqrt(diffs.reduce((a, v) => a + v * v, 0) / diffs.length);
+        const pnn50 = (diffs.filter(d => d > 50).length / diffs.length) * 100;
+
+        return { sdnn, rmssd, pnn50 };
+      },
+
+      /* ---------------- FFT ---------------- */
+      fftMagnitude: (signal) => {
+        if (!signal.length) return [];
+        const N = signal.length;
+        const mags = [];
+        for (let k = 0; k < N / 2; k++) {
+          let re = 0, im = 0;
+          for (let n = 0; n < N; n++) {
+            const ang = (2 * Math.PI * k * n) / N;
+            re += signal[n].value * Math.cos(ang);
+            im -= signal[n].value * Math.sin(ang);
+          }
+          mags.push(Math.sqrt(re * re + im * im));
+        }
+        return mags;
+      },
+
+      /* ---------------- RESPIRATION FROM PPG ---------------- */
+      estimateRespRate: (ppg, fs = 100) => {
+        if (ppg.length < fs * 3) return 0;
+        const filtered = Signal.bandpass(ppg, 0.1, 0.5);
+        const peaks = Signal.detectRPeaks(Signal.normalize(filtered));
+        const duration = (ppg.at(-1).time - ppg[0].time) / 1000;
+        return duration ? (peaks.length * 60) / duration : 0;
+      },
+
       calculateHRV: (peaks) => {
         if (peaks.length < 3) return 0;
         const intervals = [];
@@ -488,6 +572,7 @@
         { id: 'threshold', name: 'Threshold', params: [{ name: 'min', default: -1 }, { name: 'max', default: 1 }], color: '#f59e0b' },
         { id: 'removeOutliers', name: 'Outliers', params: [{ name: 'k', default: 1.5 }], color: '#f59e0b' },
         { id: 'downsample', name: 'Downsample', params: [{ name: 'factor', default: 2 }], color: '#f59e0b' },
+        { id: 'artifactReject', name: 'Artifact Reject', params: [{ name: 'maxSlope', default: 0.5 }], color: '#f59e0b' },
       ]},
       transform: { title: '🔄 Transform', ops: [
         { id: 'normalize', name: 'Normalize', params: [], color: '#10b981' },
@@ -533,9 +618,11 @@
     }
 
     // Chart Component
-    function WaveformChart({ data, color, gridColor = '#334155' }) {
+    //function WaveformChart({ data, color, gridColor = '#334155' })
+    function WaveformChart({ series, gridColor = '#334155' }) {
       const canvasRef = useRef(null);
       const containerRef = useRef(null);
+
      
       useEffect(() => {
         const canvas = canvasRef.current;
@@ -550,7 +637,8 @@
         canvas.height = rect.height * dpr;
         canvas.style.width = rect.width + 'px';
         canvas.style.height = rect.height + 'px';
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
         
         const width = rect.width, height = rect.height;
         
@@ -561,39 +649,40 @@
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= 4; i++) { ctx.beginPath(); ctx.moveTo(0, height / 4 * i); ctx.lineTo(width, height / 4 * i); ctx.stroke(); }
         for (let i = 0; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(width / 8 * i, 0); ctx.lineTo(width / 8 * i, height); ctx.stroke(); }
-        
-        if (data.length < 2) return;
-        
-        const values = data.map(d => d.value);
 
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const range = max - min || 1;
+        series.forEach(({ data, color, glow }) => {
+          if (!data || data.length < 2) return;
 
-        // hard pixel padding instead of value padding
-        const padTop = height * 0.15;
-        const padBottom = height * 0.15;
-        const usableHeight = height - padTop - padBottom;
-        
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
+          const values = data.map(d => d.value);
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+          const range = max - min || 1;
 
-        ctx.shadowBlur = color === '#f43f5e' ? 3 : 8;
+          const padTop = height * 0.15;
+          const padBottom = height * 0.15;
+          const usableHeight = height - padTop - padBottom;
 
-        
-        ctx.beginPath();
-        for (let i = 0; i < data.length; i++) {
-          const x = (i / (data.length - 1)) * width;
-          const y = padTop + (1 - (data[i].value - min) / range) * usableHeight;
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }, [data, color, gridColor]);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.shadowColor = color;
+
+          ctx.shadowBlur = glow ? 6 : 0;
+
+          ctx.beginPath();
+          data.forEach((d, i) => {
+            const x = (i / (data.length - 1)) * width;
+            const y =
+              padTop +
+              (1 - (d.value - min) / range) * usableHeight;
+
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+
+          ctx.shadowBlur = 0;
+        });
+      },[series, gridColor]);
+
       
       return(
       <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
@@ -863,7 +952,14 @@
                       <span>n: <strong>{processedEcg.length}</strong></span>
                     </div>
                   </div>
-                  <div className="chart-body tall"><WaveformChart data={processedEcg} color="#10b981" /></div>
+                  <div className="chart-body tall">
+                    <WaveformChart
+                      series={[
+                        { data: ecgBuffer, color: 'rgba(148,163,184,0.35)' },
+                        { data: processedEcg, color: '#10b981' }
+                      ]}
+                    />
+                  </div>
                 </div>
                 
                 <div className="chart-card ppg">
@@ -876,7 +972,13 @@
                       <span>σ: <strong>{ppgStats.std.toFixed(3)}</strong></span>
                     </div>
                   </div>
-                  <div className="chart-body"><WaveformChart data={ppgBuffer} color="#f43f5e" /></div>
+                  <div className="chart-body">
+                    <WaveformChart
+                      series={[
+                        { data: ppgBuffer, color: '#f43f5e', glow: true }
+                      ]}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
