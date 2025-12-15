@@ -1,0 +1,311 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#334155"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="900" height="480" fill="#0f172a" rx="12"/>
+  
+  <!-- Header -->
+  <rect y="0" width="900" height="50" fill="url(#headerGrad)" rx="12"/>
+  <rect y="25" width="900" height="25" fill="url(#headerGrad)"/>
+  
+  <!-- Logo -->
+  <rect x="15" y="8" width="34" height="34" rx="8" fill="#f43f5e"/>
+  <text x="32" y="30" fill="white" font-family="system-ui" font-size="16" text-anchor="middle">🫀</text>
+  
+  <text x="58" y="23" fill="#f8fafc" font-family="system-ui" font-size="15" font-weight="bold">BioSense Prism</text>
+  <text x="58" y="38" fill="#64748b" font-family="system-ui" font-size="9" letter-spacing="1">REAL-TIME MONITORING</text>
+  
+  <!-- Live indicator -->
+  <rect x="185" y="14" width="55" height="24" rx="6" fill="#334155"/>
+  <circle cx="200" cy="26" r="5" fill="#22c55e">
+    <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="212" y="30" fill="#f8fafc" font-family="system-ui" font-size="11" font-weight="500">Live</text>
+  
+  <!-- Stop button -->
+  <rect x="820" y="12" width="65" height="28" rx="6" fill="#ef4444"/>
+  <text x="835" y="30" fill="white" font-family="system-ui" font-size="11" font-weight="bold">■ Stop</text>
+  
+  <!-- Left Panel -->
+  <rect x="0" y="50" width="180" height="430" fill="#1e293b"/>
+  <rect x="0" y="50" width="180" height="28" fill="#334155"/>
+  <text x="12" y="68" fill="#94a3b8" font-family="system-ui" font-size="10" font-weight="600">📡 MQTT CONNECTION</text>
+  
+  <!-- Broker input -->
+  <text x="12" y="95" fill="#94a3b8" font-family="system-ui" font-size="9">Broker URL</text>
+  <rect x="12" y="100" width="156" height="26" rx="4" fill="#0f172a" stroke="#334155"/>
+  <text x="18" y="117" fill="#94a3b8" font-family="monospace" font-size="9">wss://broker.hivemq.com</text>
+  
+  <!-- Devices section -->
+  <rect x="0" y="140" width="180" height="28" fill="#334155"/>
+  <text x="12" y="158" fill="#94a3b8" font-family="system-ui" font-size="10" font-weight="600">📱 DEVICES</text>
+  
+  <!-- Device card -->
+  <rect x="12" y="175" width="156" height="75" rx="8" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5"/>
+  <circle cx="26" cy="192" r="5" fill="#22c55e"/>
+  <text x="38" y="196" fill="#f8fafc" font-family="system-ui" font-size="11" font-weight="bold">BioSensor 001</text>
+  <text x="26" y="212" fill="#64748b" font-family="monospace" font-size="9">biosensor-001</text>
+  
+  <!-- Sensor tags -->
+  <rect x="22" y="222" width="30" height="16" rx="4" fill="rgba(16,185,129,0.2)"/>
+  <text x="29" y="233" fill="#10b981" font-family="system-ui" font-size="8" font-weight="bold">ECG</text>
+  <rect x="56" y="222" width="30" height="16" rx="4" fill="rgba(244,63,94,0.2)"/>
+  <text x="63" y="233" fill="#f43f5e" font-family="system-ui" font-size="8" font-weight="bold">PPG</text>
+  <rect x="90" y="222" width="34" height="16" rx="4" fill="rgba(6,182,212,0.2)"/>
+  <text x="96" y="233" fill="#06b6d4" font-family="system-ui" font-size="8" font-weight="bold">SpO2</text>
+  <rect x="128" y="222" width="34" height="16" rx="4" fill="rgba(251,191,36,0.2)"/>
+  <text x="133" y="233" fill="#fbbf24" font-family="system-ui" font-size="8" font-weight="bold">TEMP</text>
+  
+  <!-- Signal Processing -->
+  <rect x="0" y="260" width="180" height="28" fill="#334155"/>
+  <text x="12" y="278" fill="#94a3b8" font-family="system-ui" font-size="10" font-weight="600">🔮 SIGNAL PROCESSING</text>
+  
+  <!-- Smoothing -->
+  <text x="12" y="305" fill="#64748b" font-family="system-ui" font-size="9">〰️ Smoothing</text>
+  <rect x="12" y="312" width="38" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="22" y="328" fill="#f8fafc" font-family="system-ui" font-size="10">SMA</text>
+  <rect x="54" y="312" width="38" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="64" y="328" fill="#f8fafc" font-family="system-ui" font-size="10">EMA</text>
+  <rect x="96" y="312" width="55" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="104" y="328" fill="#f8fafc" font-family="system-ui" font-size="10">Lowpass</text>
+  
+  <!-- Filtering -->
+  <text x="12" y="355" fill="#64748b" font-family="system-ui" font-size="9">🔍 Filtering</text>
+  <rect x="12" y="362" width="58" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="20" y="378" fill="#f8fafc" font-family="system-ui" font-size="10">Threshold</text>
+  <rect x="74" y="362" width="52" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="82" y="378" fill="#f8fafc" font-family="system-ui" font-size="10">Outliers</text>
+  
+  <!-- Transform -->
+  <text x="12" y="405" fill="#64748b" font-family="system-ui" font-size="9">🔄 Transform</text>
+  <rect x="12" y="412" width="58" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="18" y="428" fill="#f8fafc" font-family="system-ui" font-size="10">Normalize</text>
+  <rect x="74" y="412" width="42" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="82" y="428" fill="#f8fafc" font-family="system-ui" font-size="10">Scale</text>
+  
+  <!-- Detection -->
+  <text x="12" y="455" fill="#64748b" font-family="system-ui" font-size="9">📍 Detection</text>
+  <rect x="12" y="462" width="65" height="24" rx="5" fill="#0f172a" stroke="#334155"/>
+  <text x="20" y="478" fill="#f8fafc" font-family="system-ui" font-size="10">Find Peaks</text>
+  
+  <!-- Vitals Bar -->
+  <rect x="190" y="60" width="130" height="60" rx="10" fill="url(#cardGrad)" stroke="#334155"/>
+  <text x="245" y="78" fill="#64748b" font-family="system-ui" font-size="9" text-anchor="middle">HEART RATE</text>
+  <text x="205" y="87" font-size="20">❤️</text>
+  <!-- Animated heart rate value -->
+  <text x="205" y="108" fill="#f43f5e" font-family="monospace" font-size="24" font-weight="bold">
+    <animate attributeName="opacity" values="1;1;1;1;1;0;1" dur="0.8s" repeatCount="indefinite"/>
+    72
+  </text>
+  <text x="240" y="108" fill="#64748b" font-family="system-ui" font-size="11">BPM</text>
+  <text x="285" y="100" fill="#64748b" font-family="system-ui" font-size="14">→</text>
+  
+  <rect x="330" y="60" width="130" height="60" rx="10" fill="url(#cardGrad)" stroke="#334155"/>
+  <text x="395" y="78" fill="#64748b" font-family="system-ui" font-size="9" text-anchor="middle">SPO2</text>
+  <text x="345" y="87" font-size="20">💧</text>
+  <text x="345" y="108" fill="#06b6d4" font-family="monospace" font-size="24" font-weight="bold">98.5</text>
+  <text x="405" y="108" fill="#64748b" font-family="system-ui" font-size="11">%</text>
+  
+  <rect x="470" y="60" width="130" height="60" rx="10" fill="url(#cardGrad)" stroke="#334155"/>
+  <text x="535" y="78" fill="#64748b" font-family="system-ui" font-size="9" text-anchor="middle">TEMPERATURE</text>
+  <text x="485" y="87" font-size="20">🌡️</text>
+  <text x="485" y="108" fill="#fbbf24" font-family="monospace" font-size="24" font-weight="bold">36.6</text>
+  <text x="545" y="108" fill="#64748b" font-family="system-ui" font-size="11">°C</text>
+  
+  <rect x="610" y="60" width="100" height="60" rx="10" fill="url(#cardGrad)" stroke="#334155"/>
+  <text x="660" y="78" fill="#64748b" font-family="system-ui" font-size="9" text-anchor="middle">HRV</text>
+  <text x="625" y="87" font-size="20">📊</text>
+  <text x="625" y="108" fill="#8b5cf6" font-family="monospace" font-size="24" font-weight="bold">42</text>
+  <text x="660" y="108" fill="#64748b" font-family="system-ui" font-size="11">ms</text>
+  
+  <!-- ECG Chart -->
+  <rect x="190" y="130" width="520" height="155" rx="10" fill="#1e293b" stroke="#334155"/>
+  <rect x="190" y="130" width="520" height="30" rx="10" fill="#334155"/>
+  <rect x="190" y="150" width="520" height="10" fill="#334155"/>
+  <rect x="202" y="140" width="10" height="10" rx="2" fill="#10b981"/>
+  <text x="220" y="150" fill="#f8fafc" font-family="system-ui" font-size="11" font-weight="bold">ECG Waveform</text>
+  <rect x="330" y="138" width="55" height="16" rx="4" fill="rgba(139,92,246,0.2)"/>
+  <text x="338" y="150" fill="#8b5cf6" font-family="system-ui" font-size="9">2 filters</text>
+  <text x="600" y="150" fill="#64748b" font-family="monospace" font-size="9">μ: 0.034  σ: 0.129  n: 500</text>
+  
+  <!-- Grid lines -->
+  <g stroke="#334155" stroke-width="0.5" opacity="0.5">
+    <line x1="200" y1="190" x2="700" y2="190"/>
+    <line x1="200" y1="215" x2="700" y2="215"/>
+    <line x1="200" y1="240" x2="700" y2="240"/>
+    <line x1="260" y1="165" x2="260" y2="275"/>
+    <line x1="340" y1="165" x2="340" y2="275"/>
+    <line x1="420" y1="165" x2="420" y2="275"/>
+    <line x1="500" y1="165" x2="500" y2="275"/>
+    <line x1="580" y1="165" x2="580" y2="275"/>
+    <line x1="660" y1="165" x2="660" y2="275"/>
+  </g>
+  
+  <!-- Animated ECG line -->
+  <g filter="url(#glow)">
+    <path fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <animate 
+        attributeName="d" 
+        dur="1.8s" 
+        repeatCount="indefinite"
+        values="
+          M 205 215 L 240 215 L 250 215 L 255 220 L 262 170 L 268 245 L 275 215 L 285 210 L 320 215 L 355 215 L 365 215 L 370 220 L 377 170 L 383 245 L 390 215 L 400 210 L 435 215 L 470 215 L 480 215 L 485 220 L 492 170 L 498 245 L 505 215 L 515 210 L 550 215 L 585 215 L 595 215 L 600 220 L 607 170 L 613 245 L 620 215 L 630 210 L 665 215 L 700 215;
+          M 205 215 L 225 215 L 235 215 L 240 220 L 247 170 L 253 245 L 260 215 L 270 210 L 305 215 L 340 215 L 350 215 L 355 220 L 362 170 L 368 245 L 375 215 L 385 210 L 420 215 L 455 215 L 465 215 L 470 220 L 477 170 L 483 245 L 490 215 L 500 210 L 535 215 L 570 215 L 580 215 L 585 220 L 592 170 L 598 245 L 605 215 L 615 210 L 650 215 L 685 215 L 700 215;
+          M 205 215 L 240 215 L 250 215 L 255 220 L 262 170 L 268 245 L 275 215 L 285 210 L 320 215 L 355 215 L 365 215 L 370 220 L 377 170 L 383 245 L 390 215 L 400 210 L 435 215 L 470 215 L 480 215 L 485 220 L 492 170 L 498 245 L 505 215 L 515 210 L 550 215 L 585 215 L 595 215 L 600 220 L 607 170 L 613 245 L 620 215 L 630 210 L 665 215 L 700 215
+        "
+      />
+    </path>
+  </g>
+  
+  <!-- PPG Chart -->
+  <rect x="190" y="295" width="520" height="115" rx="10" fill="#1e293b" stroke="#334155"/>
+  <rect x="190" y="295" width="520" height="30" rx="10" fill="#334155"/>
+  <rect x="190" y="315" width="520" height="10" fill="#334155"/>
+  <rect x="202" y="305" width="10" height="10" rx="2" fill="#f43f5e"/>
+  <text x="220" y="315" fill="#f8fafc" font-family="system-ui" font-size="11" font-weight="bold">PPG Waveform</text>
+  <text x="620" y="315" fill="#64748b" font-family="monospace" font-size="9">μ: 0.379  σ: 0.139</text>
+  
+  <!-- Grid lines PPG -->
+  <g stroke="#334155" stroke-width="0.5" opacity="0.5">
+    <line x1="200" y1="355" x2="700" y2="355"/>
+    <line x1="200" y1="385" x2="700" y2="385"/>
+  </g>
+  
+  <!-- Animated PPG line -->
+  <g filter="url(#glow)">
+    <path fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <animate 
+        attributeName="d" 
+        dur="2.2s" 
+        repeatCount="indefinite"
+        values="
+          M 205 375 Q 230 375 250 345 Q 265 325 280 355 Q 290 375 320 375 Q 345 375 365 345 Q 380 325 395 355 Q 405 375 435 375 Q 460 375 480 345 Q 495 325 510 355 Q 520 375 550 375 Q 575 375 595 345 Q 610 325 625 355 Q 635 375 665 375 L 700 375;
+          M 205 375 Q 220 375 240 345 Q 255 325 270 355 Q 280 375 310 375 Q 335 375 355 345 Q 370 325 385 355 Q 395 375 425 375 Q 450 375 470 345 Q 485 325 500 355 Q 510 375 540 375 Q 565 375 585 345 Q 600 325 615 355 Q 625 375 655 375 L 700 375;
+          M 205 375 Q 230 375 250 345 Q 265 325 280 355 Q 290 375 320 375 Q 345 375 365 345 Q 380 325 395 355 Q 405 375 435 375 Q 460 375 480 345 Q 495 325 510 355 Q 520 375 550 375 Q 575 375 595 345 Q 610 325 625 355 Q 635 375 665 375 L 700 375
+        "
+      />
+    </path>
+  </g>
+  
+  <!-- Right Panel - AI Agent -->
+  <rect x="720" y="50" width="180" height="430" fill="#1e293b"/>
+  
+  <!-- Tabs -->
+  <rect x="720" y="50" width="90" height="35" fill="#334155"/>
+  <rect x="810" y="50" width="90" height="35" fill="#1e293b"/>
+  <text x="745" y="72" fill="#94a3b8" font-family="system-ui" font-size="10" font-weight="600">🔗 Pipeline</text>
+  <text x="833" y="72" fill="#f8fafc" font-family="system-ui" font-size="10" font-weight="600">🤖 AI Agent</text>
+  <rect x="810" y="83" width="90" height="2" fill="#3b82f6"/>
+  
+  <!-- ============================================ -->
+  <!-- ANIMATED CHAT CONVERSATION -->
+  <!-- ============================================ -->
+  
+  <!-- Message 1: User question (appears first) -->
+  <g>
+    <animate attributeName="opacity" values="0;0;1;1;1;1;1;1;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="95" width="160" height="45" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)"/>
+    <text x="740" y="110" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">👤 You</text>
+    <text x="740" y="128" fill="#f8fafc" font-family="system-ui" font-size="10">What's my heart rate?</text>
+  </g>
+  
+  <!-- Typing indicator (appears after question) -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;1;1;0;0;0;0;0" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="150" width="70" height="30" rx="8" fill="#0f172a" stroke="#334155"/>
+    <circle cx="748" cy="165" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="762" cy="165" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.15s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="776" cy="165" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Message 2: AI Response (appears after typing) -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;1;1;1;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="150" width="160" height="75" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="740" y="165" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">🤖 Agent</text>
+    <text x="740" y="183" fill="#f8fafc" font-family="system-ui" font-size="10">Your heart rate is</text>
+    <text x="740" y="198" fill="#f43f5e" font-family="monospace" font-size="12" font-weight="bold">72 BPM</text>
+    <text x="787" y="198" fill="#f8fafc" font-family="system-ui" font-size="10">which is</text>
+    <text x="740" y="218" fill="#22c55e" font-family="system-ui" font-size="10" font-weight="bold">✓ Normal</text>
+    <text x="792" y="218" fill="#64748b" font-family="system-ui" font-size="9">(60-100)</text>
+  </g>
+  
+  <!-- Message 3: Second user question -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;1;1;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="235" width="160" height="45" rx="8" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)"/>
+    <text x="740" y="250" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">👤 You</text>
+    <text x="740" y="268" fill="#f8fafc" font-family="system-ui" font-size="10">How's my SpO2?</text>
+  </g>
+  
+  <!-- Typing indicator 2 -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;1;0;0" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="290" width="70" height="30" rx="8" fill="#0f172a" stroke="#334155"/>
+    <circle cx="748" cy="305" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="762" cy="305" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.15s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="776" cy="305" r="4" fill="#64748b">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="0.6s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Message 4: AI Response about SpO2 -->
+  <g>
+    <animate attributeName="opacity" values="0;0;0;0;0;0;0;0;1;1" dur="8s" repeatCount="indefinite"/>
+    <rect x="730" y="290" width="160" height="75" rx="8" fill="#0f172a" stroke="#334155"/>
+    <text x="740" y="305" fill="#64748b" font-family="system-ui" font-size="8" font-weight="600">🤖 Agent</text>
+    <text x="740" y="323" fill="#f8fafc" font-family="system-ui" font-size="10">Your SpO2 is</text>
+    <text x="740" y="338" fill="#06b6d4" font-family="monospace" font-size="12" font-weight="bold">98.5%</text>
+    <text x="787" y="338" fill="#f8fafc" font-family="system-ui" font-size="10">which is</text>
+    <text x="740" y="358" fill="#22c55e" font-family="system-ui" font-size="10" font-weight="bold">✓ Excellent</text>
+    <text x="803" y="358" fill="#64748b" font-family="system-ui" font-size="9">(>95%)</text>
+  </g>
+  
+  <!-- Scroll indicator dots -->
+  <g>
+    <circle cx="810" y="420" r="3" fill="#64748b"/>
+    <circle cx="810" y="428" r="3" fill="#3b82f6">
+      <animate attributeName="cy" values="428;420;428" dur="4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Input area with blinking cursor -->
+  <rect x="720" y="440" width="180" height="40" fill="#334155"/>
+  <rect x="730" y="450" width="115" height="28" rx="6" fill="#0f172a" stroke="#334155"/>
+  <text x="740" y="468" fill="#64748b" font-family="system-ui" font-size="10">Ask about health...</text>
+  <!-- Blinking cursor -->
+  <rect x="835" y="456" width="2" height="16" fill="#3b82f6">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="850" y="450" width="40" height="28" rx="6" fill="#3b82f6"/>
+  <text x="858" y="468" fill="white" font-family="system-ui" font-size="10" font-weight="bold">Send</text>
+  
+  <!-- Border -->
+  <rect x="0" y="0" width="900" height="480" fill="none" stroke="#334155" stroke-width="2" rx="12"/>
+</svg>
