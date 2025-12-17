@@ -155,11 +155,11 @@ Raw ECG → Bandpass(0.5, 40Hz) → SMA(5) → Normalize → Detect Peaks → Ca
 
 ### Phase 4: Advanced Signal Processing
 
-- [ ] Pan-Tompkins R-peak detection algorithm
-- [ ] HRV analysis (SDNN, RMSSD, pNN50)
-- [ ] Frequency analysis with FFT
-- [ ] Respiratory rate extraction from PPG
-- [ ] Noise filtering and artifact removal
+- [x] Pan-Tompkins R-peak detection algorithm
+- [x] HRV analysis (SDNN, RMSSD, pNN50)
+- [x] Frequency analysis with FFT
+- [x] Respiratory rate extraction from PPG
+- [x] Noise filtering and artifact removal
 
 ### Phase 5: Data Persistence
 
