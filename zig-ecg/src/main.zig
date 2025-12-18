@@ -2,7 +2,7 @@ const std = @import("std");
 const fft = @import("fft.zig");
 const filter = @import("filter.zig");
 const rpeak = @import("rpeak.zig");
-
+const hrv = @import("hrv.zig");
 
 pub fn main() !void {
     // Use GPA for everything
@@ -57,10 +57,30 @@ defer allocator.free(filtered);
     allocator,
     filtered,
     fs,
+
 );
 defer allocator.free(r_peaks);
 
 std.debug.print("Detected {d} R-peaks\n", .{r_peaks.len});
+
+const metrics = try hrv.computeHRV(
+    allocator,
+    r_peaks,
+    fs,
+);
+
+std.debug.print(
+    \\HRV Metrics
+    \\SDNN  : {d:.2} ms
+    \\RMSSD : {d:.2} ms
+    \\pNN50 : {d:.1} %
+    \\
+, .{
+    metrics.sdnn,
+    metrics.rmssd,
+    metrics.pnn50,
+});
+
 
 }
 
