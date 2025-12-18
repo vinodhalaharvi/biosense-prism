@@ -1,6 +1,8 @@
 const std = @import("std");
 const fft = @import("fft.zig");
 const filter = @import("filter.zig");
+const rpeak = @import("rpeak.zig");
+
 
 pub fn main() !void {
     // Use GPA for everything
@@ -50,5 +52,15 @@ defer allocator.free(filtered);
     for (0..10) |i| {
         std.debug.print("{d:.4}\n", .{filtered[i]});
     }
+
+    const r_peaks = try rpeak.rPeakDetect(
+    allocator,
+    filtered,
+    fs,
+);
+defer allocator.free(r_peaks);
+
+std.debug.print("Detected {d} R-peaks\n", .{r_peaks.len});
+
 }
 
