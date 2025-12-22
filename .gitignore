@@ -21,3 +21,4 @@ data/
 .idea/vcs.xml
 .idea/workspace.xml
 .idea/zigbrains.xml
+.zig-cache/
