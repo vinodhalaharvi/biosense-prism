@@ -212,24 +212,24 @@
     /* Vitals */
     .vitals-bar {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
-      padding: 0.75rem;
+      padding: 0.4rem 0.6rem;
       background: var(--bg-secondary);
       border-bottom: 1px solid var(--border-light);
     }
     
     .vital-card {
       display: flex; align-items: center; gap: 0.875rem;
-      padding: 0.875rem 1rem;
+      padding: 0.6rem 0.75rem;
       background: var(--bg-primary);
       border: 1px solid var(--border-light);
       border-radius: 10px;
     }
     
     .vital-icon {
-      width: 48px; height: 48px;
+      width: 36px; height: 36px;
       border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
+      font-size: 18px;
     }
     
     .vital-icon.hr { background: rgba(244, 63, 94, 0.15); }
@@ -239,7 +239,7 @@
     
     .vital-info { flex: 1; }
     .vital-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.125rem; }
-    .vital-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; line-height: 1; }
+    .vital-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; line-height: 1; }
     .vital-value.hr { color: var(--heart); }
     .vital-value.spo2 { color: var(--spo2); }
     .vital-value.temp { color: var(--temp); }
@@ -251,18 +251,23 @@
     .vital-trend.stable { color: var(--text-muted); }
     
     /* Charts */
-    .charts-area { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; overflow-y: auto; }
+    .charts-area { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; overflow-y: auto; scrollbar-gutter: stable; }
     
     .chart-card { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; }
-    .chart-card.ecg { flex: 2; min-height: 240px; }
-    .chart-card.ppg { flex: 1; min-height: 160px; }
+    .chart-card.ecg { flex: 2.5; min-height: 240px; }
+    .chart-card.ppg { flex: 1.2; min-height: 220px; }
     
     .chart-header {
       display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 1rem;
       background: var(--bg-tertiary);
       border-bottom: 1px solid var(--border-light);
     }
+    .chart-stats {
+      gap: 0.75rem;
+      opacity: 0.85;
+    }
+
     
     .chart-indicator { width: 12px; height: 12px; border-radius: 3px; }
     .chart-indicator.ecg { background: var(--ecg); }
@@ -270,9 +275,17 @@
     .chart-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
     .chart-badge { padding: 0.25rem 0.5rem; font-size: 10px; font-weight: 600; background: rgba(139, 92, 246, 0.2); color: var(--hrv); border-radius: 4px; }
     .chart-spacer { flex: 1; }
-    .chart-stats { display: flex; gap: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .chart-stats { 
+      display: flex; 
+      gap: 0.75rem;
+      opacity: 0.85;
+      font-family: 'JetBrains Mono', monospace; 
+      font-size: 11px; 
+      color: var(--text-muted); 
+    }
     .chart-stats strong { color: var(--text-secondary); font-weight: 500; }
-    .chart-body { height: 180px; padding: 0.5rem; }
+    /*.chart-body { height: 180px; padding: 0.5rem; }*/
+    .chart-body { height: 100%; padding: 12px; }
     .chart-body.tall { height: 200px; }
     
     /* Right Panel */
@@ -523,7 +536,7 @@
     function WaveformChart({ data, color, gridColor = '#334155' }) {
       const canvasRef = useRef(null);
       const containerRef = useRef(null);
-      
+     
       useEffect(() => {
         const canvas = canvasRef.current;
         const container = containerRef.current;
@@ -552,7 +565,15 @@
         if (data.length < 2) return;
         
         const values = data.map(d => d.value);
-        const min = Math.min(...values), max = Math.max(...values), range = max - min || 1, padding = range * 0.15;
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+
+        // hard pixel padding instead of value padding
+        const padTop = height * 0.15;
+        const padBottom = height * 0.15;
+        const usableHeight = height - padTop - padBottom;
         
         ctx.strokeStyle = color;
         ctx.lineWidth = 2;
@@ -560,18 +581,26 @@
         ctx.lineJoin = 'round';
         ctx.shadowColor = color;
         ctx.shadowBlur = 8;
+
+        ctx.shadowBlur = color === '#f43f5e' ? 3 : 8;
+
         
         ctx.beginPath();
         for (let i = 0; i < data.length; i++) {
           const x = (i / (data.length - 1)) * width;
-          const y = height - ((data[i].value - min + padding) / (range + 2 * padding)) * height;
+          const y = padTop + (1 - (data[i].value - min) / range) * usableHeight;
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.stroke();
         ctx.shadowBlur = 0;
       }, [data, color, gridColor]);
       
-      return <div ref={containerRef} style={{ width: '100%', height: '100%' }}><canvas ref={canvasRef} /></div>;
+      return(
+      <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+        <canvas
+          ref={canvasRef}
+        />
+      </div>);
     }
 
     // Main App
