@@ -163,10 +163,10 @@ Raw ECG → Bandpass(0.5, 40Hz) → SMA(5) → Normalize → Detect Peaks → Ca
 
 ### Phase 5: Data Persistence
 
-- [ ] Go backend with MQTT subscriber
+- [x] Go backend with MQTT subscriber
 - [ ] TimescaleDB for time-series storage
 - [ ] REST API for historical queries
-- [ ] WebSocket server for real-time streaming
+- [x] WebSocket server for real-time streaming
 - [ ] Data export (CSV, JSON)
 
 ### Phase 6: LLM Integration
