@@ -494,7 +494,7 @@
       on(event, cb) { this.callbacks.set(event, cb); return this; }
       subscribe() {}
       startStreaming() {
-        this.interval = setInterval(() => {
+        /*this.interval = setInterval(() => {
           const now = Date.now();
           this.ecgPhase += 0.05; this.ppgPhase += 0.03;
           const msg = { deviceId: 'biosensor-001', timestamp: now, sensors: {
@@ -505,7 +505,44 @@
           }};
           this.callbacks.get('message')?.('biosense/device/001', JSON.stringify(msg));
         }, 4);
-      }
+        */
+        const ws = new WebSocket("ws://localhost:8081/ws");
+
+        ws.onopen = () => {
+        console.log("✅ Connected to backend WebSocket");
+       };
+
+        ws.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+
+          const ecg = msg.sensors?.ecg?.value;
+          const ppg = msg.sensors?.ppg?.value;
+
+          // Push samples directly into buffers
+          if (ecg !== undefined) {
+            this.ecgBuffer.push(ecg);
+            if (this.ecgBuffer.length > 1000) this.ecgBuffer.shift();
+          }
+
+          if (ppg !== undefined) {
+            this.ppgBuffer.push(ppg);
+            if (this.ppgBuffer.length > 1000) this.ppgBuffer.shift();
+          }
+        };
+
+
+          // Feed into the SAME pipeline used before
+          this.callbacks.get('message')?.(
+            'biosense/device/' + (msg.deviceId ?? 'unknown'),
+            JSON.stringify(msg)
+          );
+        };
+
+        ws.onerror = (err) => {
+          console.error("❌ WebSocket error", err);
+        };
+
+        }
       generateECG(phase) {
         const p = phase % (2 * Math.PI);
         const sq = (x) => x * x;
