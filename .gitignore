@@ -1,3 +1,4 @@
+
 # OS
 .DS_Store
 
@@ -17,3 +18,28 @@ node_modules/
 # Editors
 .vscode/
 
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# macOS
+.DS_Store
+
+# Data folder (optional if large)
+data/
+.idea/biosense-prism.iml
+.idea/copilot.data.migration.agent.xml
+.idea/copilot.data.migration.ask.xml
+.idea/copilot.data.migration.ask2agent.xml
+.idea/copilot.data.migration.edit.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/zigbrains.xml
+.zig-cache/

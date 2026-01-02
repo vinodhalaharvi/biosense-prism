@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioSense Prism | Real-time Bio Sensing</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --bg-card: #1e293b;
+      --border: #475569;
+      --border-light: #334155;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      
+      --accent: #3b82f6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      
+      --heart: #f43f5e;
+      --spo2: #06b6d4;
+      --temp: #fbbf24;
+      --ecg: #10b981;
+      --hrv: #8b5cf6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+    
+    .app { display: flex; flex-direction: column; height: 100vh; }
+    
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .logo { display: flex; align-items: center; gap: 0.75rem; }
+    
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--heart), #ec4899);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+    }
+    
+    .logo-text { display: flex; flex-direction: column; }
+    .logo-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+    .logo-subtitle { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .connection-status {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); }
+    .status-indicator.connected { background: var(--success); box-shadow: 0 0 12px rgba(34, 197, 94, 0.5); animation: pulse 2s infinite; }
+    .status-indicator.connecting { background: var(--warning); animation: blink 1s infinite; }
+    
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    .header-spacer { flex: 1; }
+    .header-actions { display: flex; gap: 0.75rem; }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--success); border-color: var(--success); color: white; }
+    .btn-primary:hover { background: #16a34a; }
+    .btn-danger { background: var(--danger); border-color: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 0.5rem 0.875rem; font-size: 12px; }
+    
+    /* Layout */
+    .main { display: flex; flex: 1; overflow: hidden; }
+    
+    /* Left Panel */
+    .left-panel {
+      width: 280px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .panel-section { border-bottom: 1px solid var(--border-light); }
+    
+    .panel-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg-tertiary);
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+    
+    .panel-content { padding: 1rem; }
+    
+    /* Config */
+    .config-group { margin-bottom: 0.875rem; }
+    .config-group:last-child { margin-bottom: 0; }
+    .config-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.375rem; }
+    
+    .config-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      outline: none;
+    }
+    
+    .config-input:focus { border-color: var(--accent); }
+    .config-input:disabled { opacity: 0.6; }
+    
+    /* Device */
+    .device-card {
+      padding: 0.875rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+    }
+    
+    .device-card.active { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+    .device-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.5rem; }
+    .device-status { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+    .device-status.online { background: var(--success); }
+    .device-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .device-id { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 0.625rem; }
+    .device-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+    
+    .device-tag {
+      padding: 0.25rem 0.5rem;
+      font-size: 10px; font-weight: 600;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    
+    .device-tag.ecg { background: rgba(16, 185, 129, 0.2); color: var(--ecg); }
+    .device-tag.ppg { background: rgba(244, 63, 94, 0.2); color: var(--heart); }
+    .device-tag.spo2 { background: rgba(6, 182, 212, 0.2); color: var(--spo2); }
+    .device-tag.temp { background: rgba(251, 191, 36, 0.2); color: var(--temp); }
+    
+    /* Operations */
+    .ops-category { margin-bottom: 1rem; }
+    .ops-category:last-child { margin-bottom: 0; }
+    .ops-category-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+    .ops-grid { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+    
+    .op-button {
+      padding: 0.5rem 0.75rem;
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .op-button:hover { background: var(--bg-tertiary); border-color: var(--accent); }
+    .op-button.smooth { border-left: 3px solid var(--spo2); }
+    .op-button.filter { border-left: 3px solid var(--warning); }
+    .op-button.transform { border-left: 3px solid var(--ecg); }
+    .op-button.detect { border-left: 3px solid var(--heart); }
+    
+    /* Center Panel */
+    .center-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-primary); overflow: hidden; }
+    
+    /* Vitals */
+    .vitals-bar {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .vital-card {
+      display: flex; align-items: center; gap: 0.875rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+    }
+    
+    .vital-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    
+    .vital-icon.hr { background: rgba(244, 63, 94, 0.15); }
+    .vital-icon.spo2 { background: rgba(6, 182, 212, 0.15); }
+    .vital-icon.temp { background: rgba(251, 191, 36, 0.15); }
+    .vital-icon.hrv { background: rgba(139, 92, 246, 0.15); }
+    
+    .vital-info { flex: 1; }
+    .vital-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.125rem; }
+    .vital-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; line-height: 1; }
+    .vital-value.hr { color: var(--heart); }
+    .vital-value.spo2 { color: var(--spo2); }
+    .vital-value.temp { color: var(--temp); }
+    .vital-value.hrv { color: var(--hrv); }
+    .vital-unit { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-left: 0.25rem; }
+    .vital-trend { font-size: 16px; font-weight: 600; }
+    .vital-trend.up { color: var(--danger); }
+    .vital-trend.down { color: var(--warning); }
+    .vital-trend.stable { color: var(--text-muted); }
+    
+    /* Charts */
+    .charts-area { flex: 1; display: flex; flex-direction: column; gap: 0.75rem; padding: 0.75rem; overflow-y: auto; }
+    
+    .chart-card { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; }
+    .chart-card.ecg { flex: 2; min-height: 240px; }
+    .chart-card.ppg { flex: 1; min-height: 160px; }
+    
+    .chart-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-light);
+    }
+    
+    .chart-indicator { width: 12px; height: 12px; border-radius: 3px; }
+    .chart-indicator.ecg { background: var(--ecg); }
+    .chart-indicator.ppg { background: var(--heart); }
+    .chart-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .chart-badge { padding: 0.25rem 0.5rem; font-size: 10px; font-weight: 600; background: rgba(139, 92, 246, 0.2); color: var(--hrv); border-radius: 4px; }
+    .chart-spacer { flex: 1; }
+    .chart-stats { display: flex; gap: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .chart-stats strong { color: var(--text-secondary); font-weight: 500; }
+    .chart-body { height: 180px; padding: 0.5rem; }
+    .chart-body.tall { height: 200px; }
+    
+    /* Right Panel */
+    .right-panel { width: 300px; background: var(--bg-secondary); border-left: 1px solid var(--border-light); display: flex; flex-direction: column; }
+    
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid var(--border-light); }
+    .tab { flex: 1; padding: 0.75rem; font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-muted); background: var(--bg-tertiary); border: none; cursor: pointer; transition: all 0.15s; }
+    .tab:first-child { border-right: 1px solid var(--border-light); }
+    .tab:hover { color: var(--text-primary); }
+    .tab.active { color: var(--text-primary); background: var(--bg-secondary); border-bottom: 2px solid var(--accent); }
+    .panel-header-sub { padding: 0.75rem 1rem; font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-light); }
+    
+    /* Agent Panel */
+    .agent-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .agent-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .agent-message { padding: 0.75rem; border-radius: 8px; }
+    .agent-message.user { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .agent-message.assistant { background: var(--bg-primary); border: 1px solid var(--border-light); }
+    .agent-message-role { font-size: 10px; font-weight: 600; color: var(--text-muted); margin-bottom: 0.375rem; }
+    .agent-message-content { font-size: 13px; color: var(--text-primary); white-space: pre-wrap; line-height: 1.5; }
+    
+    .agent-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 1rem; }
+    .agent-empty-icon { font-size: 48px; margin-bottom: 1rem; opacity: 0.6; }
+    .agent-empty-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem; }
+    .agent-empty-text { font-size: 13px; color: var(--text-muted); margin-bottom: 1rem; }
+    .agent-suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+    .agent-suggestions button { padding: 0.5rem 0.75rem; font-family: inherit; font-size: 11px; color: var(--text-primary); background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+    .agent-suggestions button:hover { background: var(--accent); border-color: var(--accent); }
+    
+    .agent-input-area { display: flex; gap: 0.5rem; padding: 0.75rem; border-top: 1px solid var(--border-light); background: var(--bg-tertiary); }
+    .agent-input { flex: 1; padding: 0.625rem 0.75rem; font-family: inherit; font-size: 13px; color: var(--text-primary); background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 6px; outline: none; }
+    .agent-input:focus { border-color: var(--accent); }
+    .agent-input::placeholder { color: var(--text-muted); }
+    .agent-send { padding: 0.625rem 1rem; font-family: inherit; font-size: 13px; font-weight: 600; color: white; background: var(--accent); border: none; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+    .agent-send:hover { background: #2563eb; }
+    
+    .pipeline-content { flex: 1; overflow-y: auto; padding: 1rem; }
+    
+    .pipeline-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 2rem; text-align: center;
+      border: 2px dashed var(--border-light); border-radius: 10px;
+    }
+    
+    .pipeline-empty-icon { font-size: 32px; margin-bottom: 0.75rem; opacity: 0.4; }
+    .pipeline-empty-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem; }
+    .pipeline-empty-text { font-size: 12px; color: var(--text-muted); }
+    
+    .pipeline-step { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden; }
+    .pipeline-step-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 0.75rem; background: var(--bg-tertiary); }
+    .pipeline-step-indicator { width: 4px; height: 20px; border-radius: 2px; }
+    .pipeline-step-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    
+    .pipeline-step-remove {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--text-muted);
+      background: transparent; border: none; border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .pipeline-step-remove:hover { background: var(--danger); color: white; }
+    .pipeline-step-params { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .pipeline-param { display: flex; align-items: center; gap: 0.75rem; }
+    .pipeline-param-label { width: 60px; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+    
+    .pipeline-param-input {
+      flex: 1;
+      padding: 0.5rem 0.625rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: 4px; outline: none;
+    }
+    
+    .pipeline-param-input:focus { border-color: var(--accent); }
+    .pipeline-arrow { display: flex; justify-content: center; padding: 0.25rem; color: var(--text-muted); font-size: 12px; }
+    .pipeline-actions { padding: 0.75rem 1rem; border-top: 1px solid var(--border-light); }
+    
+    /* Alerts */
+    .alerts-section { border-top: 1px solid var(--border-light); max-height: 200px; display: flex; flex-direction: column; }
+    .alerts-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: var(--bg-tertiary); font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .alerts-badge { min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: var(--danger); color: white; border-radius: 10px; padding: 0 0.375rem; }
+    .alerts-list { flex: 1; overflow-y: auto; }
+    .alert-item { display: flex; gap: 0.625rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); font-size: 12px; }
+    .alert-item.critical { border-left: 3px solid var(--danger); background: rgba(239, 68, 68, 0.05); }
+    .alert-item.warning { border-left: 3px solid var(--warning); background: rgba(245, 158, 11, 0.05); }
+    .alert-icon { font-size: 14px; }
+    .alert-content { flex: 1; }
+    .alert-message { font-weight: 500; color: var(--text-primary); margin-bottom: 0.125rem; }
+    .alert-time { font-size: 11px; color: var(--text-muted); }
+    .alerts-empty { padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 12px; }
+    
+    /* Toast */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.875rem 1.25rem; font-size: 13px; font-weight: 500; color: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); z-index: 1000; animation: slideUp 0.3s ease; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.info { background: var(--accent); }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+    // Signal Processing
+    const Signal = {
+      map: (signal, f) => signal.map(s => ({ ...s, value: f(s.value) })),
+      scale: (signal, k) => Signal.map(signal, v => v * k),
+      offset: (signal, d) => Signal.map(signal, v => v + d),
+      abs: (signal) => Signal.map(signal, v => Math.abs(v)),
+      square: (signal) => Signal.map(signal, v => v * v),
+      normalize: (signal) => {
+        if (signal.length === 0) return signal;
+        const values = signal.map(s => s.value);
+        const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
+        return Signal.map(signal, v => (v - min) / range);
+      },
+      sma: (signal, window = 5) => {
+        if (signal.length < window) return signal;
+        const result = []; let sum = 0;
+        for (let i = 0; i < signal.length; i++) {
+          sum += signal[i].value;
+          if (i >= window) sum -= signal[i - window].value;
+          if (i >= window - 1) result.push({ ...signal[i], value: sum / window });
+        }
+        return result;
+      },
+      ema: (signal, alpha = 0.1) => {
+        if (signal.length === 0) return signal;
+        const result = [signal[0]];
+        for (let i = 1; i < signal.length; i++) {
+          const prev = result[i - 1].value;
+          result.push({ ...signal[i], value: alpha * signal[i].value + (1 - alpha) * prev });
+        }
+        return result;
+      },
+      lowpass: (signal, cutoff = 0.1) => Signal.ema(signal, cutoff),
+      highpass: (signal, cutoff = 0.1) => {
+        const low = Signal.lowpass(signal, cutoff);
+        return signal.map((s, i) => ({ ...s, value: s.value - (low[i]?.value || 0) }));
+      },
+      bandpass: (signal, low = 0.05, high = 0.2) => Signal.highpass(Signal.lowpass(signal, high), low),
+      threshold: (signal, min = -Infinity, max = Infinity) => signal.filter(s => s.value >= min && s.value <= max),
+      removeOutliers: (signal, k = 1.5) => {
+        const values = signal.map(s => s.value).sort((a, b) => a - b);
+        const q1 = values[Math.floor(values.length * 0.25)], q3 = values[Math.floor(values.length * 0.75)], iqr = q3 - q1;
+        return Signal.threshold(signal, q1 - k * iqr, q3 + k * iqr);
+      },
+      downsample: (signal, factor = 2) => signal.filter((_, i) => i % factor === 0),
+      diff: (signal) => signal.length < 2 ? [] : signal.slice(1).map((s, i) => ({ ...s, value: s.value - signal[i].value })),
+      stats: (signal) => {
+        if (signal.length === 0) return { min: 0, max: 0, mean: 0, std: 0 };
+        const values = signal.map(s => s.value);
+        const min = Math.min(...values), max = Math.max(...values);
+        const mean = values.reduce((a, b) => a + b, 0) / values.length;
+        const std = Math.sqrt(values.reduce((a, v) => a + Math.pow(v - mean, 2), 0) / values.length);
+        return { min, max, mean, std };
+      },
+      detectPeaks: (signal, threshold = 0.5) => {
+        const peaks = [];
+        for (let i = 2; i < signal.length - 2; i++) {
+          const v = signal[i].value;
+          if (v > signal[i-1].value && v > signal[i-2].value && v > signal[i+1].value && v > signal[i+2].value && v > threshold) peaks.push(signal[i]);
+        }
+        return peaks;
+      },
+      calculateHR: (peaks) => {
+        if (peaks.length < 2) return 0;
+        const intervals = [];
+        for (let i = 1; i < peaks.length; i++) intervals.push(peaks[i].time - peaks[i-1].time);
+        const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+        return avgInterval > 0 ? 60000 / avgInterval : 0;
+      },
+      calculateHRV: (peaks) => {
+        if (peaks.length < 3) return 0;
+        const intervals = [];
+        for (let i = 1; i < peaks.length; i++) intervals.push(peaks[i].time - peaks[i-1].time);
+        const diffs = [];
+        for (let i = 1; i < intervals.length; i++) diffs.push(Math.abs(intervals[i] - intervals[i-1]));
+        return diffs.length > 0 ? diffs.reduce((a, b) => a + b, 0) / diffs.length : 0;
+      },
+    };
+
+    const OPERATIONS = {
+      smooth: { title: '〰️ Smoothing', ops: [
+        { id: 'sma', name: 'SMA', params: [{ name: 'window', default: 5 }], color: '#06b6d4' },
+        { id: 'ema', name: 'EMA', params: [{ name: 'alpha', default: 0.1 }], color: '#06b6d4' },
+        { id: 'lowpass', name: 'Lowpass', params: [{ name: 'cutoff', default: 0.1 }], color: '#06b6d4' },
+        { id: 'bandpass', name: 'Bandpass', params: [{ name: 'low', default: 0.05 }, { name: 'high', default: 0.2 }], color: '#06b6d4' },
+      ]},
+      filter: { title: '🔍 Filtering', ops: [
+        { id: 'threshold', name: 'Threshold', params: [{ name: 'min', default: -1 }, { name: 'max', default: 1 }], color: '#f59e0b' },
+        { id: 'removeOutliers', name: 'Outliers', params: [{ name: 'k', default: 1.5 }], color: '#f59e0b' },
+        { id: 'downsample', name: 'Downsample', params: [{ name: 'factor', default: 2 }], color: '#f59e0b' },
+      ]},
+      transform: { title: '🔄 Transform', ops: [
+        { id: 'normalize', name: 'Normalize', params: [], color: '#10b981' },
+        { id: 'scale', name: 'Scale', params: [{ name: 'k', default: 1 }], color: '#10b981' },
+        { id: 'diff', name: 'Derivative', params: [], color: '#10b981' },
+        { id: 'abs', name: 'Absolute', params: [], color: '#10b981' },
+      ]},
+      detect: { title: '📍 Detection', ops: [
+        { id: 'detectPeaks', name: 'Find Peaks', params: [{ name: 'threshold', default: 0.5 }], color: '#f43f5e' },
+      ]}
+    };
+
+    // Mock MQTT
+    class MockMQTT {
+      constructor() { this.callbacks = new Map(); this.connected = false; this.interval = null; this.ecgPhase = 0; this.ppgPhase = 0; }
+      connect() { setTimeout(() => { this.connected = true; this.callbacks.get('connect')?.(); this.startStreaming(); }, 500); return this; }
+      on(event, cb) { this.callbacks.set(event, cb); return this; }
+      subscribe() {}
+      startStreaming() {
+        this.interval = setInterval(() => {
+          const now = Date.now();
+          this.ecgPhase += 0.05; this.ppgPhase += 0.03;
+          const msg = { deviceId: 'biosensor-001', timestamp: now, sensors: {
+            ecg: { value: this.generateECG(this.ecgPhase) },
+            ppg: { value: this.generatePPG(this.ppgPhase) },
+            spo2: { value: 97 + Math.sin(now / 5000) * 1.5 + Math.random() * 0.5 },
+            temp: { value: 36.6 + Math.sin(now / 30000) * 0.3 + Math.random() * 0.1 }
+          }};
+          this.callbacks.get('message')?.('biosense/device/001', JSON.stringify(msg));
+        }, 4);
+      }
+      generateECG(phase) {
+        const p = phase % (2 * Math.PI);
+        const sq = (x) => x * x;
+        return 0.15 * Math.exp(-sq(p - 0.5) / 0.02) - 0.1 * Math.exp(-sq(p - 1.0) / 0.005) + 1.2 * Math.exp(-sq(p - 1.1) / 0.003) - 0.2 * Math.exp(-sq(p - 1.2) / 0.005) + 0.3 * Math.exp(-sq(p - 1.8) / 0.03) + (Math.random() - 0.5) * 0.05;
+      }
+      generatePPG(phase) {
+        const p = phase % (2 * Math.PI);
+        const sq = (x) => x * x;
+        return 0.3 + 0.5 * (Math.exp(-sq(p - 1.5) / 0.15) + 0.3 * Math.exp(-sq(p - 2.5) / 0.1)) + (Math.random() - 0.5) * 0.02;
+      }
+      end() { if (this.interval) clearInterval(this.interval); this.connected = false; }
+    }
+
+    // Chart Component
+    function WaveformChart({ data, color, gridColor = '#334155' }) {
+      const canvasRef = useRef(null);
+      const containerRef = useRef(null);
+      
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        const container = containerRef.current;
+        if (!canvas || !container) return;
+        
+        const ctx = canvas.getContext('2d');
+        const rect = container.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        ctx.scale(dpr, dpr);
+        
+        const width = rect.width, height = rect.height;
+        
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, width, height);
+        
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i <= 4; i++) { ctx.beginPath(); ctx.moveTo(0, height / 4 * i); ctx.lineTo(width, height / 4 * i); ctx.stroke(); }
+        for (let i = 0; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(width / 8 * i, 0); ctx.lineTo(width / 8 * i, height); ctx.stroke(); }
+        
+        if (data.length < 2) return;
+        
+        const values = data.map(d => d.value);
+        // const min = Math.min(...values), max = Math.max(...values), range = max - min || 1, padding = range * 0.15;
+
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+
+        // hard pixel padding instead of value padding
+        const topPad = height * 0.12;
+        const bottomPad = height * 0.12;
+                
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = color;
+       // ctx.shadowBlur = 8;
+        ctx.shadowBlur = color === '#f43f5e' ? 3 : 8;
+        
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+          const x = (i / (data.length - 1)) * width;
+          //const y = height - ((data[i].value - min + padding) / (range + 2 * padding)) * height;
+
+          const y = height - bottomPad - ((data[i].value - min) / range) * (height - topPad - bottomPad);
+
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }, [data, color, gridColor]);
+      
+      return <div ref={containerRef} style={{ width: '100%', height: '100%' }}><canvas ref={canvasRef} /></div>;
+    }
+
+    // Main App
+    function App() {
+      const [connectionStatus, setConnectionStatus] = useState('disconnected');
+      const [mqttConfig, setMqttConfig] = useState({ broker: 'wss://broker.hivemq.com:8884/mqtt', topic: 'biosense/device/+' });
+      const clientRef = useRef(null);
+      const [ecgBuffer, setEcgBuffer] = useState([]);
+      const [ppgBuffer, setPpgBuffer] = useState([]);
+      const [vitals, setVitals] = useState({ hr: 0, hrTrend: 'stable', spo2: 0, temp: 0, hrv: 0 });
+      const [pipeline, setPipeline] = useState([]);
+      const [alerts, setAlerts] = useState([]);
+      const [toast, setToast] = useState(null);
+      const [activeTab, setActiveTab] = useState('pipeline');
+      const [agentMessages, setAgentMessages] = useState([]);
+      const [agentInput, setAgentInput] = useState('');
+      const BUFFER_SIZE = 500;
+      
+      const showToast = (message, type = 'info') => { setToast({ message, type }); setTimeout(() => setToast(null), 3000); };
+      
+      // Mock LLM Agent - In production, this would call your LLM API
+      const sendAgentMessage = useCallback((message) => {
+        if (!message.trim()) return;
+        setAgentInput('');
+        
+        // Add user message
+        setAgentMessages(prev => [...prev, { role: 'user', content: message }]);
+        
+        // Generate mock AI response based on current vitals
+        setTimeout(() => {
+          let response = '';
+          const msg = message.toLowerCase();
+          
+          if (msg.includes('heart rate') || msg.includes('hr') || msg.includes('pulse')) {
+            const hrStatus = vitals.hr > 100 ? 'elevated' : vitals.hr < 60 ? 'low' : 'normal';
+            response = `Your current heart rate is ${vitals.hr.toFixed(0)} BPM, which is ${hrStatus}. ` +
+              (vitals.hr > 100 ? 'Consider resting or deep breathing exercises.' : 
+               vitals.hr < 60 ? 'This could be normal if you\'re athletic, otherwise consult a doctor.' :
+               'This is within the healthy range of 60-100 BPM.');
+          } else if (msg.includes('spo2') || msg.includes('oxygen') || msg.includes('saturation')) {
+            const spo2Status = vitals.spo2 < 94 ? 'concerning' : vitals.spo2 < 96 ? 'slightly low' : 'normal';
+            response = `Your SpO2 is ${vitals.spo2.toFixed(1)}%, which is ${spo2Status}. ` +
+              (vitals.spo2 < 94 ? '⚠️ Values below 94% may indicate respiratory issues. Please consult a healthcare provider.' :
+               'Normal SpO2 is typically 95-100%.');
+          } else if (msg.includes('temp') || msg.includes('temperature')) {
+            const tempStatus = vitals.temp > 37.5 ? 'elevated (possible fever)' : vitals.temp < 36 ? 'low' : 'normal';
+            response = `Your body temperature is ${vitals.temp.toFixed(1)}°C, which is ${tempStatus}. ` +
+              'Normal body temperature ranges from 36.1°C to 37.2°C.';
+          } else if (msg.includes('ecg') || msg.includes('waveform') || msg.includes('rhythm')) {
+            const stats = Signal.stats(processedEcg);
+            response = `ECG Analysis:\n• Signal mean: ${stats.mean.toFixed(3)} mV\n• Standard deviation: ${stats.std.toFixed(3)}\n• Sample count: ${processedEcg.length}\n` +
+              `• HRV: ${vitals.hrv.toFixed(0)} ms\n\n` +
+              'The waveform shows regular QRS complexes. For detailed cardiac analysis, please consult a cardiologist.';
+          } else if (msg.includes('summar') || msg.includes('overview') || msg.includes('vital')) {
+            response = `📊 **Vitals Summary**\n\n` +
+              `❤️ Heart Rate: ${vitals.hr.toFixed(0)} BPM\n` +
+              `💧 SpO2: ${vitals.spo2.toFixed(1)}%\n` +
+              `🌡️ Temperature: ${vitals.temp.toFixed(1)}°C\n` +
+              `📈 HRV: ${vitals.hrv.toFixed(0)} ms\n\n` +
+              (vitals.hr > 60 && vitals.hr < 100 && vitals.spo2 > 95 ? 
+                '✅ All vitals appear within normal ranges.' :
+                '⚠️ Some readings may need attention. See individual metrics for details.');
+          } else if (msg.includes('help') || msg.includes('what can you')) {
+            response = `I can help you understand your biosensor data! Try asking:\n\n` +
+              `• "What's my heart rate?"\n` +
+              `• "Is my SpO2 normal?"\n` +
+              `• "Analyze my ECG waveform"\n` +
+              `• "Check my temperature"\n` +
+              `• "Summarize my vitals"\n` +
+              `• "What's my HRV?"`;
+          } else {
+            response = `I can analyze your biosensor data. Current readings:\n\n` +
+              `❤️ HR: ${vitals.hr.toFixed(0)} BPM | 💧 SpO2: ${vitals.spo2.toFixed(1)}% | 🌡️ Temp: ${vitals.temp.toFixed(1)}°C\n\n` +
+              `Try asking specific questions like "Is my heart rate normal?" or "Analyze my ECG".`;
+          }
+          
+          setAgentMessages(prev => [...prev, { role: 'assistant', content: response }]);
+        }, 500 + Math.random() * 500);
+      }, [vitals, processedEcg]);
+      
+      const connect = useCallback(() => {
+        setConnectionStatus('connecting');
+        const client = new MockMQTT();
+        client.on('connect', () => { setConnectionStatus('connected'); showToast('Connected to MQTT broker', 'success'); });
+        client.on('message', (topic, message) => { try { processIncomingData(JSON.parse(message)); } catch (e) {} });
+        client.connect();
+        clientRef.current = client;
+      }, []);
+      
+      const disconnect = useCallback(() => {
+        if (clientRef.current) { clientRef.current.end(); clientRef.current = null; }
+        setConnectionStatus('disconnected');
+        showToast('Disconnected', 'info');
+      }, []);
+      
+      const processIncomingData = useCallback((data) => {
+        const now = data.timestamp;
+        if (data.sensors.ecg) setEcgBuffer(prev => [...prev, { time: now, value: data.sensors.ecg.value }].slice(-BUFFER_SIZE));
+        if (data.sensors.ppg) setPpgBuffer(prev => [...prev, { time: now, value: data.sensors.ppg.value }].slice(-BUFFER_SIZE));
+        setVitals(prev => ({ ...prev, spo2: data.sensors.spo2?.value || prev.spo2, temp: data.sensors.temp?.value || prev.temp }));
+      }, []);
+      
+      const processedEcg = useMemo(() => {
+        let result = ecgBuffer;
+        for (const step of pipeline) { const fn = Signal[step.op]; if (fn) result = fn(result, ...Object.values(step.params)); }
+        return result;
+      }, [ecgBuffer, pipeline]);
+      
+      useEffect(() => {
+        if (processedEcg.length < 100) return;
+        const normalized = Signal.normalize(processedEcg);
+        const peaks = Signal.detectPeaks(normalized, 0.6);
+        const hr = Signal.calculateHR(peaks), hrv = Signal.calculateHRV(peaks);
+        setVitals(prev => ({ ...prev, hr: hr || prev.hr, hrv, hrTrend: hr > prev.hr + 2 ? 'up' : hr < prev.hr - 2 ? 'down' : 'stable' }));
+        if (hr > 100) addAlert('warning', `Elevated HR: ${hr.toFixed(0)} BPM`);
+        else if (hr < 50 && hr > 0) addAlert('warning', `Low HR: ${hr.toFixed(0)} BPM`);
+      }, [processedEcg]);
+      
+      useEffect(() => { if (vitals.spo2 < 94 && vitals.spo2 > 0) addAlert('critical', `Low SpO2: ${vitals.spo2.toFixed(1)}%`); }, [vitals.spo2]);
+      
+      const addAlert = useCallback((level, message) => {
+        setAlerts(prev => { if (prev.length > 0 && prev[0].message === message) return prev; return [{ level, message, time: new Date() }, ...prev].slice(0, 10); });
+      }, []);
+      
+      const addOperation = useCallback((opId) => {
+        let opDef = null;
+        for (const cat of Object.values(OPERATIONS)) { opDef = cat.ops.find(o => o.id === opId); if (opDef) break; }
+        if (!opDef) return;
+        const params = {}; opDef.params.forEach(p => params[p.name] = p.default);
+        setPipeline(prev => [...prev, { id: `${opId}-${Date.now()}`, op: opId, name: opDef.name, color: opDef.color, params }]);
+        showToast(`Added ${opDef.name}`, 'success');
+      }, []);
+      
+      const updatePipelineParam = useCallback((stepId, paramName, value) => {
+        setPipeline(prev => prev.map(s => s.id === stepId ? { ...s, params: { ...s.params, [paramName]: parseFloat(value) || 0 } } : s));
+      }, []);
+      
+      const ecgStats = useMemo(() => Signal.stats(processedEcg), [processedEcg]);
+      const ppgStats = useMemo(() => Signal.stats(ppgBuffer), [ppgBuffer]);
+      
+      return (
+        <div className="app">
+          <header className="header">
+            <div className="logo">
+              <div className="logo-icon">🫀</div>
+              <div className="logo-text">
+                <div className="logo-title">BioSense Prism</div>
+                <div className="logo-subtitle">Real-time Monitoring</div>
+              </div>
+            </div>
+            <div className="connection-status">
+              <div className={`status-indicator ${connectionStatus}`}></div>
+              <span>{connectionStatus === 'connected' ? 'Live' : connectionStatus === 'connecting' ? 'Connecting...' : 'Offline'}</span>
+            </div>
+            <div className="header-spacer"></div>
+            <div className="header-actions">
+              {connectionStatus === 'connected' ? (
+                <button className="btn btn-danger" onClick={disconnect}>■ Stop</button>
+              ) : (
+                <button className="btn btn-primary" onClick={connect}>▶ Start</button>
+              )}
+            </div>
+          </header>
+          
+          <div className="main">
+            <div className="left-panel">
+              <div className="panel-section">
+                <div className="panel-header">📡 MQTT Connection</div>
+                <div className="panel-content">
+                  <div className="config-group">
+                    <label className="config-label">Broker URL</label>
+                    <input className="config-input" value={mqttConfig.broker} onChange={e => setMqttConfig(prev => ({ ...prev, broker: e.target.value }))} disabled={connectionStatus === 'connected'} />
+                  </div>
+                  <div className="config-group">
+                    <label className="config-label">Topic</label>
+                    <input className="config-input" value={mqttConfig.topic} onChange={e => setMqttConfig(prev => ({ ...prev, topic: e.target.value }))} disabled={connectionStatus === 'connected'} />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="panel-section">
+                <div className="panel-header">📱 Devices</div>
+                <div className="panel-content">
+                  <div className="device-card active">
+                    <div className="device-header">
+                      <div className={`device-status ${connectionStatus === 'connected' ? 'online' : ''}`}></div>
+                      <span className="device-name">BioSensor 001</span>
+                    </div>
+                    <div className="device-id">biosensor-001</div>
+                    <div className="device-tags">
+                      <span className="device-tag ecg">ECG</span>
+                      <span className="device-tag ppg">PPG</span>
+                      <span className="device-tag spo2">SpO2</span>
+                      <span className="device-tag temp">Temp</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="panel-section" style={{ flex: 1, overflow: 'auto' }}>
+                <div className="panel-header">🔮 Signal Processing</div>
+                <div className="panel-content">
+                  {Object.entries(OPERATIONS).map(([key, cat]) => (
+                    <div key={key} className="ops-category">
+                      <div className="ops-category-title">{cat.title}</div>
+                      <div className="ops-grid">
+                        {cat.ops.map(op => (
+                          <button key={op.id} className={`op-button ${key}`} onClick={() => addOperation(op.id)}>{op.name}</button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="center-panel">
+              <div className="vitals-bar">
+                <div className="vital-card">
+                  <div className="vital-icon hr">❤️</div>
+                  <div className="vital-info">
+                    <div className="vital-label">Heart Rate</div>
+                    <div><span className="vital-value hr">{vitals.hr.toFixed(0)}</span><span className="vital-unit">BPM</span></div>
+                  </div>
+                  <span className={`vital-trend ${vitals.hrTrend}`}>{vitals.hrTrend === 'up' ? '↑' : vitals.hrTrend === 'down' ? '↓' : '→'}</span>
+                </div>
+                <div className="vital-card">
+                  <div className="vital-icon spo2">💧</div>
+                  <div className="vital-info">
+                    <div className="vital-label">SpO2</div>
+                    <div><span className="vital-value spo2">{vitals.spo2.toFixed(1)}</span><span className="vital-unit">%</span></div>
+                  </div>
+                </div>
+                <div className="vital-card">
+                  <div className="vital-icon temp">🌡️</div>
+                  <div className="vital-info">
+                    <div className="vital-label">Temperature</div>
+                    <div><span className="vital-value temp">{vitals.temp.toFixed(1)}</span><span className="vital-unit">°C</span></div>
+                  </div>
+                </div>
+                <div className="vital-card">
+                  <div className="vital-icon hrv">📊</div>
+                  <div className="vital-info">
+                    <div className="vital-label">HRV</div>
+                    <div><span className="vital-value hrv">{vitals.hrv.toFixed(0)}</span><span className="vital-unit">ms</span></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="charts-area">
+                <div className="chart-card ecg">
+                  <div className="chart-header">
+                    <div className="chart-indicator ecg"></div>
+                    <span className="chart-title">ECG Waveform</span>
+                    {pipeline.length > 0 && <span className="chart-badge">{pipeline.length} filters</span>}
+                    <div className="chart-spacer"></div>
+                    <div className="chart-stats">
+                      <span>μ: <strong>{ecgStats.mean.toFixed(3)}</strong></span>
+                      <span>σ: <strong>{ecgStats.std.toFixed(3)}</strong></span>
+                      <span>n: <strong>{processedEcg.length}</strong></span>
+                    </div>
+                  </div>
+                  <div className="chart-body tall"><WaveformChart data={processedEcg} color="#10b981" /></div>
+                </div>
+                
+                <div className="chart-card ppg">
+                  <div className="chart-header">
+                    <div className="chart-indicator ppg"></div>
+                    <span className="chart-title">PPG Waveform</span>
+                    <div className="chart-spacer"></div>
+                    <div className="chart-stats">
+                      <span>μ: <strong>{ppgStats.mean.toFixed(3)}</strong></span>
+                      <span>σ: <strong>{ppgStats.std.toFixed(3)}</strong></span>
+                    </div>
+                  </div>
+                  <div className="chart-body"><WaveformChart data={ppgBuffer} color="#f43f5e" /></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="right-panel">
+              <div className="tabs">
+                <button className={`tab ${activeTab === 'pipeline' ? 'active' : ''}`} onClick={() => setActiveTab('pipeline')}>🔗 Pipeline</button>
+                <button className={`tab ${activeTab === 'agent' ? 'active' : ''}`} onClick={() => setActiveTab('agent')}>🤖 AI Agent</button>
+              </div>
+              
+              {activeTab === 'agent' ? (
+                <div className="agent-panel">
+                  <div className="agent-messages">
+                    {agentMessages.map((msg, i) => (
+                      <div key={i} className={`agent-message ${msg.role}`}>
+                        <div className="agent-message-role">{msg.role === 'user' ? '👤 You' : '🤖 Agent'}</div>
+                        <div className="agent-message-content">{msg.content}</div>
+                      </div>
+                    ))}
+                    {agentMessages.length === 0 && (
+                      <div className="agent-empty">
+                        <div className="agent-empty-icon">🤖</div>
+                        <div className="agent-empty-title">AI Health Agent</div>
+                        <div className="agent-empty-text">Ask questions about your biosensor data</div>
+                        <div className="agent-suggestions">
+                          <button onClick={() => sendAgentMessage("What's my current heart rate?")}>What's my HR?</button>
+                          <button onClick={() => sendAgentMessage("Analyze my ECG waveform")}>Analyze ECG</button>
+                          <button onClick={() => sendAgentMessage("Is my SpO2 normal?")}>Check SpO2</button>
+                          <button onClick={() => sendAgentMessage("Summarize my vitals")}>Summarize vitals</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="agent-input-area">
+                    <input
+                      className="agent-input"
+                      placeholder="Ask about your health data..."
+                      value={agentInput}
+                      onChange={e => setAgentInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && sendAgentMessage(agentInput)}
+                    />
+                    <button className="agent-send" onClick={() => sendAgentMessage(agentInput)}>Send</button>
+                  </div>
+                </div>
+              ) : (
+              <>
+              <div className="panel-header-sub">Processing Pipeline</div>
+              <div className="pipeline-content">
+                {pipeline.length === 0 ? (
+                  <div className="pipeline-empty">
+                    <div className="pipeline-empty-icon">🔗</div>
+                    <div className="pipeline-empty-title">No Filters Applied</div>
+                    <div className="pipeline-empty-text">Click operations from the left panel</div>
+                  </div>
+                ) : pipeline.map((step, idx) => (
+                  <React.Fragment key={step.id}>
+                    {idx > 0 && <div className="pipeline-arrow">↓</div>}
+                    <div className="pipeline-step">
+                      <div className="pipeline-step-header">
+                        <div className="pipeline-step-indicator" style={{ background: step.color }}></div>
+                        <span className="pipeline-step-name">{step.name}</span>
+                        <button className="pipeline-step-remove" onClick={() => setPipeline(pipeline.filter(s => s.id !== step.id))}>×</button>
+                      </div>
+                      {Object.keys(step.params).length > 0 && (
+                        <div className="pipeline-step-params">
+                          {Object.entries(step.params).map(([name, value]) => (
+                            <div key={name} className="pipeline-param">
+                              <label className="pipeline-param-label">{name}</label>
+                              <input className="pipeline-param-input" type="number" step="any" value={value} onChange={e => updatePipelineParam(step.id, name, e.target.value)} />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </React.Fragment>
+                ))}
+              </div>
+              {pipeline.length > 0 && <div className="pipeline-actions"><button className="btn btn-sm" style={{ width: '100%' }} onClick={() => setPipeline([])}>Clear Pipeline</button></div>}
+              
+              <div className="alerts-section">
+                <div className="alerts-header">🚨 Alerts {alerts.length > 0 && <span className="alerts-badge">{alerts.length}</span>}</div>
+                <div className="alerts-list">
+                  {alerts.length === 0 ? <div className="alerts-empty">No alerts</div> : alerts.map((alert, i) => (
+                    <div key={i} className={`alert-item ${alert.level}`}>
+                      <span className="alert-icon">{alert.level === 'critical' ? '🔴' : '🟡'}</span>
+                      <div className="alert-content">
+                        <div className="alert-message">{alert.message}</div>
+                        <div className="alert-time">{alert.time.toLocaleTimeString()}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+
+              </>
+              )}
+            </div>
+          </div>
+          
+          {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
